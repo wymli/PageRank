@@ -26,8 +26,8 @@ class pageRank(object):
         block: the number of pages in one block;
         '''
         self.size = transferMat.size()
-        self.rank = [0 for _ in range(self.size)]
-        self.oldRank = [-999 for _ in range(self.size)]
+        self.rank = [1./self.size for _ in range(self.size)]
+        self.oldRank = [1 for _ in range(self.size)]
         self.mat = transferMat
         self.beta = beta
         self.block = block
@@ -37,6 +37,10 @@ class pageRank(object):
     def loadRank(self, block: int, type: str) -> []:
         '''
         we will load data from storeDir
+        if block == 1 ,we won't block i.e. return a origin rank list,otherwise return a block-based rank list
+        \n
+        todo: write a decoder generater,which yield a block from file each iter.
+        we must implement it ourselves, because we only want to read one block into memory one time
         '''
         if type == "new":
             if block == 1:
@@ -62,6 +66,8 @@ class pageRank(object):
     def storeRank(self, rank: [], type: str):
         '''
         we will store data to storeDir
+        \n
+        todo: add a encoder ,write the encoded str/binary to file
         '''
         if type == "new":
             self.rank = rank
@@ -81,12 +87,16 @@ class pageRank(object):
 
     def extendNewRank(self, rank: []):
         '''
-        only append it to "new"
+        only append it to "new",typically it will append one block rank to rankFile
+        \n
+        todo: add a encoder ,append the encoded str/binary to the file\n
+        if you use json, you should remove the last "}" in the file ,
+        and then append this encoded str of the block,and then add "}" to make a close
         '''
         self.rank.extend(rank)
         return
 
-    def iter(self,block):
+    def iter(self, block):
         '''
         iter will call a plain powerIteration without block if param block=1
         otherwise it will call iterBlock
@@ -94,7 +104,7 @@ class pageRank(object):
         if block != 1:
             self.iterBlock()
             return
-            
+
         newRank = [self.preVal for _ in range(self.size)]
         oldRank = self.loadNewRank()
 
@@ -127,7 +137,7 @@ class pageRank(object):
             self.extendNewRank(newBlockRank)
         self.storeOldRank(oldRank)
 
-    def isConvergence(self, epsilon: float, metricFunc=metric.get2Norm) -> (bool,float):
+    def isConvergence(self, epsilon: float, metricFunc=metric.get2Norm) -> (bool, float):
         newRank = self.loadNewRank()
         oldRank = self.loadOldRank()
         # print("new:", newRank)
@@ -135,8 +145,8 @@ class pageRank(object):
         metric = metricFunc([x[0] - x[1]
                              for x in zip(self.rank, self.oldRank)])
         if metric <= epsilon:
-            return True,metric
-        return False,metric
+            return True, metric
+        return False, metric
 
     def getkBest(self, k: int) -> [page]:
         '''

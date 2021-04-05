@@ -4,18 +4,22 @@ import powerIter
 import time
 
 beta = 0.8
-N = 1000
-block = 10
+N = 100000
+block = 100000
 epsilon = 0.01
 topK = 10
-
+# note: we will iter "N*N / block" times when we make block-strip sparseMat 
 
 def printSuperParam(delim):
     print(delim)
     print(f"N:{N},block:{block},epsilon:{epsilon},topK:{topK},beta:{beta}")
+    print(delim)
 
 
 def pageRankFromRawMat(block=2):
+    '''
+    deprecated: rawMat will cause OOM,using pageRankDirectly instead
+    '''
     rawMat = rawMatGen.rawMat(N)
     sparseMat = sparseMatGen.sparseMat(rawMat, block)
     pr = powerIter.pageRank(sparseMat, beta, block)

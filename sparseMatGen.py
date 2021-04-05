@@ -58,7 +58,10 @@ class sparseMat(ITransferMat):
 
     @staticmethod
     def ToPageLinks(rawMat: rawMat) -> [pageLink]:
-        pageLinks, pageRanks = [], []
+        '''
+        deprecated: rawMat is huge,causing OOM, and it it is very slow to iterate it
+        '''
+        pageLinks = []
         size = rawMat.size()
         for c in range(size):
             dests = []
@@ -70,6 +73,9 @@ class sparseMat(ITransferMat):
 
     @staticmethod
     def ToBlockPageLinks(rawMat: rawMat, block: int) -> [blockPageLink]:
+        '''
+        deprecated: rawMat is huge,causing OOM, and it it is very slow to iterate it
+        '''
         size = rawMat.size()
         n = (size+block-1) // block  # ceil(rawMat / block)
         blockPageLinks = []
@@ -91,15 +97,12 @@ class sparseMat(ITransferMat):
         we must get a normal [pagelink] first, and then derive a [blockpagelink],
         it is impossible to get a [blockpagelink] from random
         '''
-        pageLinks, pageRanks = [], []
+        pageLinks = []
         for c in range(size):
-            col = rawMatGen.getOneCol(size)
-            deg = rawMatGen.sumNonZero(col)
-            dests = []
-            for r in range(size):
-                if col[r] != 0:
-                    dests.append(r)
+            dests = rawMatGen.getOneColDests(size)
+            deg = len(dests)
             pageLinks.append(pageLink(c, deg, dests))
+
         # if block == 1,it means we don't need to block,so return directly
         if block == 1:
             return pageLinks

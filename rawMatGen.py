@@ -33,6 +33,12 @@ def getOneCol(N: int) -> [int]:
     col = [1./k if i in idxs else 0 for i in range(N)]
     return col
 
+def getOneColDests(N: int) -> [int]:
+    k = getRandOutDeg(6, 15)
+    idxs = getRandOutPageIdx(k, N)
+    # col = [1./k if i in idxs else 0 for i in range(N)]
+    return idxs
+
 
 def TestGetOneCol():
     print("%s(10)" % TestGetOneCol.__name__, getOneCol(10))
