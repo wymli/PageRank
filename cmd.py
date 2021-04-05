@@ -4,7 +4,7 @@ import powerIter
 import time
 
 beta = 0.8
-N = 10000
+N = 1000
 block = 10
 epsilon = 0.01
 topK = 10
