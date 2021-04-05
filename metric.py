@@ -1,5 +1,7 @@
 
 import math
+import time
+
 
 class metric(object):
     @staticmethod
@@ -25,8 +27,28 @@ def TestMetric():
     print(metric.getInfNorm(a))
 
 
+def printTimeElapsed(ff):
+    def f(*args, **kw):
+        beg = time.time()
+        res = ff(*args, **kw)
+        end = time.time()
+        print(f"[decorate] function {ff.__name__} \t\t\t\tdone, elapsed: {end-beg}s")
+        return res
+    return f
+
+
+@printTimeElapsed
+def f(a, b, c):
+    pass
+
+
+def TestPrintTimeElapsed():
+    f(1, 2, 3)
+
+
 def Test():
     TestMetric()
+    TestPrintTimeElapsed()
 
 
 if __name__ == "__main__":

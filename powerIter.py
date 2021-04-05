@@ -1,6 +1,6 @@
 from sparseMatGen import sparseMat
 from ITransferMat import ITransferMat
-from metric import metric
+import metric
 import heapq
 import json
 
@@ -96,6 +96,7 @@ class pageRank(object):
         self.rank.extend(rank)
         return
 
+    @metric.printTimeElapsed
     def iter(self, block):
         '''
         iter will call a plain powerIteration without block if param block=1
@@ -117,6 +118,7 @@ class pageRank(object):
         # todo:for efficiency, we can just rename the file,instead of writing back again
         self.storeOldRank(oldRank)
 
+    @metric.printTimeElapsed
     def iterBlock(self):
         '''
         this is a kind of Block Stripe pagerank
@@ -137,7 +139,8 @@ class pageRank(object):
             self.extendNewRank(newBlockRank)
         self.storeOldRank(oldRank)
 
-    def isConvergence(self, epsilon: float, metricFunc=metric.get2Norm) -> (bool, float):
+    @metric.printTimeElapsed
+    def isConvergence(self, epsilon: float, metricFunc=metric.metric.get2Norm) -> (bool, float):
         newRank = self.loadNewRank()
         oldRank = self.loadOldRank()
         # print("new:", newRank)
@@ -148,6 +151,7 @@ class pageRank(object):
             return True, metric
         return False, metric
 
+    @metric.printTimeElapsed
     def getkBest(self, k: int) -> [page]:
         '''
         top-k problem
@@ -159,6 +163,7 @@ class pageRank(object):
                 continue
             else:
                 heapq.heapreplace(res, page(i+k, v))
+        res.sort(reverse=True)
         return res
 
 

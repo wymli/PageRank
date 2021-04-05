@@ -1,7 +1,7 @@
 from rawMatGen import rawMat
 import rawMatGen
 from ITransferMat import ITransferMat
-
+import metric
 
 class pageLink(object):
     '''
@@ -32,7 +32,7 @@ class blockPageLink(object):
 
 
 class sparseMat(ITransferMat):
-
+    
     def __init__(self, rawMat: rawMat, block=1):
         '''
         if rawMat == int, we will generate sparseMat directly,
@@ -41,7 +41,14 @@ class sparseMat(ITransferMat):
         '''
         if isinstance(rawMat, int):
             self.size_ = rawMat
-            self.pageLinks = sparseMat.GenBlockPageLinks(self.size_, block)
+            if block != 1:
+                self.pageLinks = sparseMat.GenBlockPageLinks(self.size_, block)
+                return
+
+            self.pageLinks = sparseMat.GenPageLinks(self.size_)
+            if block != 1:
+                self.pageLinks = sparseMat.PageLinks2Block(
+                    self.pageLinks, block)
             return
 
         self.size_ = rawMat.size()
@@ -92,10 +99,9 @@ class sparseMat(ITransferMat):
         return blockPageLinks
 
     @staticmethod
-    def GenBlockPageLinks(size: int, block: int) -> [blockPageLink]:
+    def GenPageLinks(size: int) -> [blockPageLink]:
         '''
-        we must get a normal [pagelink] first, and then derive a [blockpagelink],
-        it is impossible to get a [blockpagelink] from random
+        直接从随机数生成原始的稀疏转移矩阵
         '''
         pageLinks = []
         for c in range(size):
@@ -103,14 +109,13 @@ class sparseMat(ITransferMat):
             deg = len(dests)
             pageLinks.append(pageLink(c, deg, dests))
 
-        # if block == 1,it means we don't need to block,so return directly
-        if block == 1:
-            return pageLinks
-        # otherwise, we should change it to blockpagelinks
-        return sparseMat.PageLinks2Block(pageLinks,block)
-    
+        return pageLinks
+
     @staticmethod
-    def PageLinks2Block(pageLinks:[pageLink],block)->[blockPageLink]:
+    def PageLinks2Block(pageLinks: [pageLink], block) -> [blockPageLink]:
+        '''
+        将原始的稀疏转移矩阵转换成分块的稀疏转移矩阵
+        '''
         size = len(pageLinks)
         n = (size+block-1) // block  # ceil(rawMat / block)
         blockPageLinks = []
@@ -125,6 +130,30 @@ class sparseMat(ITransferMat):
                         dests.append(r)
                 pageLinksInBlock.append(pageLink(c, pageLinks[c].deg, dests))
             blockPageLinks.append(blockPageLink(pageLinksInBlock))
+        return blockPageLinks
+
+    @staticmethod
+    @metric.printTimeElapsed
+    def GenBlockPageLinks(size, block):
+        '''
+        直接从随机数生成分块的稀疏转移矩阵
+        '''
+        n = (size+block-1) // block  # ceil(rawMat / block)
+        blockPageLinks = [blockPageLink([]) for _ in range(n)]
+        for c in range(size):
+            dests = rawMatGen.getOneColDests(size)
+            deg = len(dests)
+            for dest in dests:
+                store = blockPageLinks[dest//block].pageLinks
+                find = False
+                for i, pl in enumerate(store):
+                    if pl.src == c:
+                        store[i].dests.append(dest)
+                        find = True
+                        break
+                if not find:
+                    store.append(pageLink(c, deg, [dest]))
+
         return blockPageLinks
 
     def getPageLink(self, i) -> pageLink:

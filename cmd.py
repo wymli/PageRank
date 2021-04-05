@@ -2,10 +2,11 @@ import rawMatGen
 import sparseMatGen
 import powerIter
 import time
+import metric
 
 beta = 0.8
 N = 100000
-block = 100000
+block = 100
 epsilon = 0.01
 topK = 10
 # note: we will iter "N*N / block" times when we make block-strip sparseMat 
@@ -43,7 +44,7 @@ def pageRankFromRawMat(block=2):
     printSuperParam("=*"*20)
     print(f"topK:{topK}", pages)
 
-
+@metric.printTimeElapsed
 def pageRankDirectly(block=2):
     # rawMat = rawMatGen.rawMat(N)
     sparseMat = sparseMatGen.sparseMat(N, block)
@@ -64,7 +65,6 @@ def pageRankDirectly(block=2):
 
     print(f"[done] iter:{cnt} , loss={loss} , time:{end-beg}s ")
     pages = pr.getkBest(topK)
-    pages.sort(reverse=True)
     printSuperParam("=*"*20)
     print(f"topK:{topK}", pages)
 
