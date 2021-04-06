@@ -32,7 +32,8 @@ def printTimeElapsed(ff):
         beg = time.time()
         res = ff(*args, **kw)
         end = time.time()
-        print(f"[decorate] function {ff.__name__} \t\t\t\tdone, elapsed: {end-beg}s")
+        fn = ff.__name__
+        print(f"[Time] function {fn: <30} \tdone, elapsed: {end-beg}s")
         return res
     return f
 

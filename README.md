@@ -45,22 +45,13 @@ c -->|"getkBest()"| c
 
 迭代速度是快速的,且普遍的,迭代次数为1
 ```sh
-[decorate] function GenBlockPageLinks   done, elapsed: 292.35559582710266s
-[decorate] function iterBlock   done, elapsed: 1.3519837856292725s
-[decorate] function iter        done, elapsed: 1.3529930114746094s
-[decorate] function isConvergence       done, elapsed: 0.0529789924621582s
-iter:1 loss:0.0008151764340924569
-[done] iter:1 , loss=0.0008151764340924569 , time:1.4059720039367676s 
-[decorate] function getkBest    done, elapsed: 0.020017147064208984s
-=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-N:100000,block:100,epsilon:0.01,topK:10,beta:0.8
-=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-topK:10 [{95308,2.338812298812299e-05}, {69491,2.3256454656454662e-05}, {81164,2.2819513819513822e-05}, {19127,2.255437895437896e-05}, {8824,2.2483938283938286e-05}, {47170,2.246568986568987e-05}, {16190,2.2390564990564995e-05}, {48997,2.1872416472416473e-05}, {10924,2.1771228771228773e-05}, {14275,2.165845265845266e-05}]
-[decorate] function pageRankDirectly    done, elapsed: 294.7816412448883s
+
 ```
 
 ## 耗时
 程序的耗时主要在生成分块的稀疏矩阵上,
+当N=100K,block=2时,生成分块稀疏矩阵的时间为11s左右,而迭代时间仅为1.4s左右
+当N=100K,block=10时,生成分块稀疏矩阵的时间为31s左右,而迭代时间仅为1.4s左右
 当N=100K,block=100时,生成分块稀疏矩阵的时间为292s左右,而迭代时间仅为1.4s左右
 当N=100K,block=1000时,生成分块稀疏矩阵的时间为2815s左右,而迭代时间仅为1.4s左右
 
@@ -92,3 +83,6 @@ class metric(object):
 
 ## TopK problem
 题目要求输出 PageRank值最大的10个网页的编号与对应PageRank值,这是典型的topk问题,我们使用一个简单的小顶堆完成近似O(NlogK)的检索
+
+## TODO
+- 判断block=1 改为 判断block=size,作为不分块的判断条件,以此兼容non-block alg.,block-based alg.,block-strip alg.

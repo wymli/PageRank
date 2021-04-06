@@ -7,4 +7,3 @@ class ITransferMat(object):
     def size(self):
         pass
 
-    # def

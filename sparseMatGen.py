@@ -3,6 +3,7 @@ import rawMatGen
 from ITransferMat import ITransferMat
 import metric
 
+
 class pageLink(object):
     '''
     we only maintain outDegree&destinations, excluding src
@@ -32,27 +33,33 @@ class blockPageLink(object):
 
 
 class sparseMat(ITransferMat):
-    
-    def __init__(self, rawMat: rawMat, block=1):
+
+    def __init__(self, rawMat: rawMat, block=1, version=3):
         '''
-        if rawMat == int, we will generate sparseMat directly,
-        and generally,we should let rawMat == int,in order to avoiding OOM,
-        otherwise if we have enough memory,we can let rawMat be a real 2d-array
+        if type(rawMat) is int,we will generate sparseMat from random\n
+        if type(rawMat) is 2d-array,we will generate sparseMat from origin rawMat\n
+        generally,type(rawMat) should be int, avoiding OOM
         '''
         if isinstance(rawMat, int):
             self.size_ = rawMat
-            if block != 1:
+            # if we need to block,we just generate [blockpagelink] fron random directly
+            if version == 3 and block != 1:
                 self.pageLinks = sparseMat.GenBlockPageLinks(self.size_, block)
                 return
 
+            # the following code will generate [pagelink] first,and then generate [blockpagelink] from [pagelink]
+            # generally, it is deprecated,only used when we don't want to block
             self.pageLinks = sparseMat.GenPageLinks(self.size_)
-            if block != 1:
+            if version == 2 and block != 1:
                 self.pageLinks = sparseMat.PageLinks2Block(
                     self.pageLinks, block)
             return
 
+        # the following code is deprecated,only used when rawMat is a 2d-array
+        if version != 1:
+            raise "unknown version"
         self.size_ = rawMat.size()
-        if block == None or block == 1:
+        if block == 1:
             self.pageLinks = sparseMat.ToPageLinks(rawMat)
         else:
             self.pageLinks = sparseMat.ToBlockPageLinks(rawMat, block)
