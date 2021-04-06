@@ -39,13 +39,24 @@ c -->|"getkBest()"| c
 
 在实际生成数据时，不适用rawMat，而是直接在sparseMat中一边生成列数据，一边转成pageLink，否则巨大的rawMat会导致OOM，即使我们有足够的内存，我们在遍历rawMat生成sparseMat的时候，也会需要至少N^2的遍历次数，极其缓慢
 
-目前，我们首先生成了原始的未分块的sparseMat，然后将其转换成分块的sparseMat，这需要至少N^2/block的遍历次数（这里block指一个block所含的page数) ，依旧缓慢，等待优化
+一种朴素的想法是首先生成原始的未分块的sparseMat，然后将其转换成分块的sparseMat，这需要至少N^2*outDegree/block的遍历次数（这里block指一个block所含的page数),在实践上,这很慢
+
+目前我们采用直接生成分块的sparseMat,速度上大幅提升
 
 ## 幂迭代
-
-迭代速度是快速的,且普遍的,迭代次数为1
+迭代速度是快速的,且普遍为1.4s左右,迭代次数为1
 ```sh
-
+[Time] function GenBlockPageLinks               done, elapsed: 11.590656995773315s
+[Time] function iterBlock                       done, elapsed: 1.544142246246338s
+[Time] function iter                            done, elapsed: 1.545184850692749s
+[Time] function isConvergence                   done, elapsed: 0.0509946346282959s
+iter:1 loss:0.000812115524604311
+[done] iter:1 , loss=0.000812115524604311 , time:1.6011526584625244s
+[Time] function getkBest                        done, elapsed: 0.025041818618774414s
+=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+N:100000,block:2,epsilon:0.01,topK:10,beta:0.8
+=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+topK:10 [{85809,2.2703585303585302e-05}, {16306,2.2444422244422245e-05}, {85884,2.1527938727938727e-05}, {62114,2.149019869019869e-05}, {49771,2.1474614274614276e-05}, {88772,2.1457431457431456e-05}, {41516,2.1288089688089685e-05}, {8502,2.124693084693085e-05}, {33764,2.1246153[Time] function pageRankFromRandom              done, elapsed: 14.226988077163696s
 ```
 
 ## 耗时
