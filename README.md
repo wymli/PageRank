@@ -44,40 +44,78 @@ c -->|"getkBest()"| c
 目前我们采用直接生成分块的sparseMat,速度上大幅提升
 
 ## 幂迭代
+基于`block-strip`的幂迭代算法:  
+```python
+sparseMat = sparseMatGen.sparseMat(N, block)
+pr = powerIter.pageRank(sparseMat, beta, block)
+```  
+基于block-based的幂迭代算法
+```python
+sparseMat = sparseMatGen.sparseMat(N, 1)
+pr = powerIter.pageRank(sparseMat, beta, block)
+```
+不分块的幂迭代算法
+```python
+sparseMat = sparseMatGen.sparseMat(N, 1)
+pr = powerIter.pageRank(sparseMat, beta, 1)
+```
+
+基于block-strip的测试代码:
+```python
+sparseMat = sparseMatGen.sparseMat(N, block)
+pr = powerIter.pageRank(sparseMat, beta, block)
+
+cnt = 0
+loss = 0.
+beg = time.time()
+
+while (True):
+    cnt += 1
+    pr.iter(block)
+    ok, loss = pr.isConvergence(epsilon, norm)
+    print(f"\033[1;36miter:{cnt} loss:{loss}\033[0m")
+    if ok:
+        break
+
+end = time.time()
+```
+
 ```sh
-[Time] function GenBlockPageLinks               done, elapsed: 11.29367470741272s
-[Time] function iterBlock                       done, elapsed: 1.483109474182129s
-[Time] function iter                            done, elapsed: 1.483109474182129s
-[Time] function isConvergence                   done, elapsed: 0.02479839324951172s
-iter:1 loss:0.20483296325896294
-[Time] function iterBlock                       done, elapsed: 1.5102384090423584s
-[Time] function iter                            done, elapsed: 1.5102384090423584s
-[Time] function isConvergence                   done, elapsed: 0.03152179718017578s
-iter:2 loss:0.05174947061899918
-[Time] function iterBlock                       done, elapsed: 1.4768381118774414s
-[Time] function iter                            done, elapsed: 1.4768381118774414s
-[Time] function isConvergence                   done, elapsed: 0.02904224395751953s
-iter:3 loss:0.013310063712810962
-[Time] function iterBlock                       done, elapsed: 1.4872612953186035s
-[Time] function iter                            done, elapsed: 1.4872612953186035s
-[Time] function isConvergence                   done, elapsed: 0.028776884078979492s
-iter:4 loss:0.003421622933965828
-[done] iter:4 , loss=0.003421622933965828 , time:6.075042247772217s
-[Time] function getkBest                        done, elapsed: 0.017998218536376953s
+[Time] function GenBlockPageLinks               done, elapsed: 11.288015604019165s
+[Time] function iterBlock                       done, elapsed: 1.4938631057739258s
+[Time] function iter                            done, elapsed: 1.4938631057739258s
+[Time] function isConvergence                   done, elapsed: 0.029286861419677734s
+iter:1 loss:0.2051479146187183
+[Time] function iterBlock                       done, elapsed: 1.5120673179626465s
+[Time] function iter                            done, elapsed: 1.5120673179626465s
+[Time] function isConvergence                   done, elapsed: 0.026860952377319336s
+iter:2 loss:0.05188872172406834
+[Time] function iterBlock                       done, elapsed: 1.5165603160858154s
+[Time] function iter                            done, elapsed: 1.5175974369049072s
+[Time] function isConvergence                   done, elapsed: 0.023964405059814453s
+iter:3 loss:0.01331470528623809
+[Time] function iterBlock                       done, elapsed: 1.4943392276763916s
+[Time] function iter                            done, elapsed: 1.4943392276763916s
+[Time] function isConvergence                   done, elapsed: 0.027005672454833984s
+iter:4 loss:0.003420038875911453
+[done] iter:4 , loss=0.003420038875911453 , time:6.128960132598877s 
+[Time] function getkBest                        done, elapsed: 0.0189969539642334s
 =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-N:100000,block:2,epsilon:0.01,topK:10,beta:0.8
+version:block-strip norm:get1Norm N:100000 block:2 epsilon:0.01 beta:0.8 topK:10
 =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-topK:10 [{94613,2.353355505223721e-05}, {76612,2.3470645217374968e-05}, {7964,2.3235558173499365e-05}, {71112,2.284916788570746e-05}, {3185,2.260153149324065e-05}, {26556,2.2564451960363848e-05}, {61130,2.253012423729923e-05}, {16702,2.24816157745655e-05}, {19175,2.244627766301746e-05}, {5011,2.2237470816559202e-05}]
-[Time] function pageRankFromRandom              done, elapsed: 18.36472249031067s
+topK:10 [{99492,2.4467868468307758e-05}, {52213,2.2831662494980623e-05}, {31316,2.275518415162204e-05}, {30117,2.237661085315984e-05}, {87025,2.2047833295394432e-05}, {70664,2.1979179042671457e-05}, {74682,2.195218374211288e-05}, {82260,2.1896281467010162e-05}, {68772,2.1878808206160118e-05}, {66221,2.1811104731274202e-05}]
+[Time] function pageRankFromRandom              done, elapsed: 18.44188618659973s
 ```
 
 ## 耗时
-程序的耗时主要在生成分块的稀疏矩阵上,
-当N=100K,block=2时,生成分块稀疏矩阵的时间为11s左右,而迭代时间仅为1.4s左右
-当N=100K,block=10时,生成分块稀疏矩阵的时间为31s左右,而迭代时间仅为1.4s左右
-当N=100K,block=100时,生成分块稀疏矩阵的时间为292s左右,而迭代时间仅为1.4s左右
+程序的耗时主要在生成分块的稀疏矩阵上,  
+当N=100K,block=2时,生成分块稀疏矩阵的时间为11s左右,而迭代时间仅为1.4s左右  
+当N=100K,block=10时,生成分块稀疏矩阵的时间为31s左右,而迭代时间仅为1.4s左右  
+当N=100K,block=100时,生成分块稀疏矩阵的时间为292s左右,而迭代时间仅为1.4s左右  
 当N=100K,block=1000时,生成分块稀疏矩阵的时间为2815s左右,而迭代时间仅为1.4s左右
 
+当使用二范数时,程序迭代次数一般为1,
+当使用一范数时,程序迭代次数显著增加
 
 ## 序列化
 
@@ -107,5 +145,3 @@ class metric(object):
 ## TopK problem
 题目要求输出 PageRank值最大的10个网页的编号与对应PageRank值,这是典型的topk问题,我们使用一个简单的小顶堆完成近似O(NlogK)的检索
 
-## TODO
-- 判断block=1 改为 判断block=size,作为不分块的判断条件,以此兼容non-block alg.,block-based alg.,block-strip alg.

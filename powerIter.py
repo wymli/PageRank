@@ -38,6 +38,7 @@ class pageRank(object):
         '''
         we will load data from storeDir
         if block == 1 ,we won't block i.e. return a origin rank list,otherwise return a block-based rank list
+        \ntodo: we should change block = 1 to block=size,i.e. if block == size ,we won't block
         \n
         todo: write a decoder generater,which yield a block from file each iter.
         we must implement it ourselves, because we only want to read one block into memory one time
