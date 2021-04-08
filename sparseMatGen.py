@@ -73,7 +73,8 @@ class sparseMat(ITransferMat):
     @staticmethod
     def ToPageLinks(rawMat: rawMat) -> [pageLink]:
         '''
-        deprecated: rawMat is huge,causing OOM, and it it is very slow to iterate it
+        deprecated:
+        从原始二维矩阵生成稀疏矩阵,OOM
         '''
         pageLinks = []
         size = rawMat.size()
@@ -88,7 +89,8 @@ class sparseMat(ITransferMat):
     @staticmethod
     def ToBlockPageLinks(rawMat: rawMat, block: int) -> [blockPageLink]:
         '''
-        deprecated: rawMat is huge,causing OOM, and it it is very slow to iterate it
+        deprecated: 
+        从原始二维矩阵生成分块的稀疏矩阵,OOM
         '''
         size = rawMat.size()
         n = (size+block-1) // block  # ceil(rawMat / block)
@@ -108,6 +110,7 @@ class sparseMat(ITransferMat):
     @staticmethod
     def GenPageLinks(size: int) -> [blockPageLink]:
         '''
+        deprecated:
         直接从随机数生成原始的稀疏转移矩阵
         '''
         pageLinks = []
@@ -121,7 +124,8 @@ class sparseMat(ITransferMat):
     @staticmethod
     def PageLinks2Block(pageLinks: [pageLink], block) -> [blockPageLink]:
         '''
-        将原始的稀疏转移矩阵转换成分块的稀疏转移矩阵
+        deprecated:
+        将原始的稀疏转移矩阵转换成分块的稀疏转移矩阵,迭代太慢
         '''
         size = len(pageLinks)
         n = (size+block-1) // block  # ceil(rawMat / block)
@@ -145,7 +149,7 @@ class sparseMat(ITransferMat):
         '''
         直接从随机数生成分块的稀疏转移矩阵
         '''
-        n = (size+block-1) // block  # ceil(rawMat / block)
+        n = (size+block-1) // block  # ceil(N / block)
         blockPageLinks = [blockPageLink([]) for _ in range(n)]
         for c in range(size):
             dests = rawMatGen.getOneColDests(size)

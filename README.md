@@ -44,19 +44,31 @@ c -->|"getkBest()"| c
 目前我们采用直接生成分块的sparseMat,速度上大幅提升
 
 ## 幂迭代
-迭代速度是快速的,且普遍为1.4s左右,迭代次数为1
 ```sh
-[Time] function GenBlockPageLinks               done, elapsed: 11.590656995773315s
-[Time] function iterBlock                       done, elapsed: 1.544142246246338s
-[Time] function iter                            done, elapsed: 1.545184850692749s
-[Time] function isConvergence                   done, elapsed: 0.0509946346282959s
-iter:1 loss:0.000812115524604311
-[done] iter:1 , loss=0.000812115524604311 , time:1.6011526584625244s
-[Time] function getkBest                        done, elapsed: 0.025041818618774414s
+[Time] function GenBlockPageLinks               done, elapsed: 11.29367470741272s
+[Time] function iterBlock                       done, elapsed: 1.483109474182129s
+[Time] function iter                            done, elapsed: 1.483109474182129s
+[Time] function isConvergence                   done, elapsed: 0.02479839324951172s
+iter:1 loss:0.20483296325896294
+[Time] function iterBlock                       done, elapsed: 1.5102384090423584s
+[Time] function iter                            done, elapsed: 1.5102384090423584s
+[Time] function isConvergence                   done, elapsed: 0.03152179718017578s
+iter:2 loss:0.05174947061899918
+[Time] function iterBlock                       done, elapsed: 1.4768381118774414s
+[Time] function iter                            done, elapsed: 1.4768381118774414s
+[Time] function isConvergence                   done, elapsed: 0.02904224395751953s
+iter:3 loss:0.013310063712810962
+[Time] function iterBlock                       done, elapsed: 1.4872612953186035s
+[Time] function iter                            done, elapsed: 1.4872612953186035s
+[Time] function isConvergence                   done, elapsed: 0.028776884078979492s
+iter:4 loss:0.003421622933965828
+[done] iter:4 , loss=0.003421622933965828 , time:6.075042247772217s
+[Time] function getkBest                        done, elapsed: 0.017998218536376953s
 =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 N:100000,block:2,epsilon:0.01,topK:10,beta:0.8
 =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-topK:10 [{85809,2.2703585303585302e-05}, {16306,2.2444422244422245e-05}, {85884,2.1527938727938727e-05}, {62114,2.149019869019869e-05}, {49771,2.1474614274614276e-05}, {88772,2.1457431457431456e-05}, {41516,2.1288089688089685e-05}, {8502,2.124693084693085e-05}, {33764,2.1246153[Time] function pageRankFromRandom              done, elapsed: 14.226988077163696s
+topK:10 [{94613,2.353355505223721e-05}, {76612,2.3470645217374968e-05}, {7964,2.3235558173499365e-05}, {71112,2.284916788570746e-05}, {3185,2.260153149324065e-05}, {26556,2.2564451960363848e-05}, {61130,2.253012423729923e-05}, {16702,2.24816157745655e-05}, {19175,2.244627766301746e-05}, {5011,2.2237470816559202e-05}]
+[Time] function pageRankFromRandom              done, elapsed: 18.36472249031067s
 ```
 
 ## 耗时

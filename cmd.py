@@ -6,10 +6,10 @@ import metric
 
 beta = 0.8
 N = 100000
-block = 10
+block = 2
 epsilon = 0.01
 topK = 10
-# note: we will iter "N*N*outDeg / block" times when we make block-strip sparseMat 
+# note: maybe we will iter "N*N*outDeg / block" times when we make block-strip sparseMat 
 # note: the best practise: block=2
 
 def printSuperParam(delim):
@@ -32,7 +32,7 @@ def pageRankFromRawMat(block=2):
     while (True):
         cnt += 1
         pr.iter(block)
-        ok, loss = pr.isConvergence(epsilon)
+        ok, loss = pr.isConvergence(epsilon,metric.metric.get1Norm)
         print(f"iter:{cnt} loss:{loss}")
         if ok:
             break
@@ -54,10 +54,11 @@ def pageRankFromRandom(block=2):
     cnt = 0
     loss = 0.
     beg = time.time()
+
     while (True):
         cnt += 1
         pr.iter(block)
-        ok, loss = pr.isConvergence(epsilon)
+        ok, loss = pr.isConvergence(epsilon,metric.metric.get1Norm)
         print(f"iter:{cnt} loss:{loss}")
         if ok:
             break

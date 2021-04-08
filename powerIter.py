@@ -27,7 +27,7 @@ class pageRank(object):
         '''
         self.size = transferMat.size()
         self.rank = [1./self.size for _ in range(self.size)]
-        self.oldRank = [1 for _ in range(self.size)]
+        self.oldRank = [-999 for _ in range(self.size)]
         self.mat = transferMat
         self.beta = beta
         self.block = block
@@ -133,7 +133,7 @@ class pageRank(object):
             for pl in blockPL:
                 for dest in pl.dests:
                     # print("dest:", dest, "block:", self.block,
-                    #       "curBlock:", curBlockLen, "src:", pl.src, "oldRank:", len(oldRank))
+                    #       "curBlocklen:", curBlockLen, "src:", pl.src,"outDeg",pl.deg, "oldRanklen:", len(oldRank) , "oldRank:",oldRank[pl.src])
                     newBlockRank[dest %
                                  self.block] += self.beta * oldRank[pl.src] / pl.deg
             self.extendNewRank(newBlockRank)
