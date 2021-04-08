@@ -39,7 +39,7 @@ c -->|"getkBest()"| c
 
 在实际生成数据时，不适用rawMat，而是直接在sparseMat中一边生成列数据，一边转成pageLink，否则巨大的rawMat会导致OOM，即使我们有足够的内存，我们在遍历rawMat生成sparseMat的时候，也会需要至少N^2的遍历次数，极其缓慢
 
-一种朴素的想法是首先生成原始的未分块的sparseMat，然后将其转换成分块的sparseMat，这需要至少N^2*outDegree/block的遍历次数（这里block指一个block所含的page数),在实践上,这很慢
+一种朴素的想法是首先生成原始的未分块的sparseMat，然后将其转换成分块的sparseMat，这需要至少N^2*outDegree/block(?存疑)的遍历次数（这里block指一个block所含的page数),在实践上,这很慢
 
 目前我们采用直接生成分块的sparseMat,速度上大幅提升
 
