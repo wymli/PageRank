@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+# line encoding :unix: LF
 import rawMatGen
 import sparseMatGen
 import powerIter
@@ -71,7 +73,8 @@ def pageRankFromRandom(block=2):
 
     end = time.time()
 
-    print(f"\033[1;32m[done] iter:{cnt} , loss={loss} , time:{end-beg}s \033[0m")
+    print(
+        f"\033[1;32m[done] iter:{cnt} , loss={loss} , time:{end-beg}s \033[0m")
     pages = pr.getkBest(topK)
     printSuperParam("=*"*20)
     print(f"topK:{topK}", pages)

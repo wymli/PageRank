@@ -41,6 +41,7 @@ class sparseMat(ITransferMat):
         generally,type(rawMat) should be int, avoiding OOM
         '''
         # todo: judge version first,e.g. switch version{case 3:... case 2:... case 1:...}
+        
         if isinstance(rawMat, int):
             self.size_ = rawMat
             # if we need to block,we just generate [blockpagelink] fron random directly
