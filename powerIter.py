@@ -31,6 +31,7 @@ class pageRank(object):
         self.mat = transferMat
         self.beta = beta
         self.block = block
+        self.tranMatBlock = transferMat.block
         self.preVal = (1.-self.beta)/self.size
         self.storeDir = storeDir
 
@@ -130,7 +131,7 @@ class pageRank(object):
         for i in range(n):
             curBlockLen = min((i+1)*self.block, self.size) - i*self.block
             newBlockRank = [self.preVal for _ in range(curBlockLen)]
-            blockPL = self.mat.getBlockPageLink(i).pageLinks
+            blockPL = self.mat.getBlockPageLink(i)
             for pl in blockPL:
                 for dest in pl.dests:
                     # print("dest:", dest, "block:", self.block,

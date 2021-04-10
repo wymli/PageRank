@@ -6,39 +6,56 @@ import powerIter
 import time
 import metric
 
-version = "block-strip"
+
 norm = metric.metric.get1Norm
 beta = 0.8
 N = 100000
-block = 2
+rankBlock = 2
+tranMatBlock = 2
 epsilon = 0.01
 topK = 10
 
-# note: maybe we will iter "N*N*outDeg / block" times when we make block-strip sparseMat
-# note: the best practise: block=2
+# note: maybe the best practise: block=2
+
+methodStr = ""
 
 
-def printSuperParam(delim):
+def getMethodStr() -> str:
+    if rankBlock != 1 and tranMatBlock != 1:
+        return "block-strip"
+    elif rankBlock != 1 and tranMatBlock == 1:
+        return "block-based"
+    elif rankBlock == 1 and tranMatBlock == 1:
+        return "unblock"
+    else:
+        raise "not supported method"
+
+
+def printSuperParam(delim=""):
     print("\033[1;31m"+delim)
     print(
-        f"version:{version} norm:{norm.__name__} N:{N} block:{block} epsilon:{epsilon} beta:{beta} topK:{topK}")
+        f"method:{getMethodStr()} norm:{norm.__name__} epsilon:{epsilon} beta:{beta}")
+    print(f"N:{N} rankBlock:{rankBlock} transferMatBlock:{tranMatBlock} topK:{topK}")
     print(delim, "\033[0m")
 
 
-def pageRankFromRawMat(block=2):
+printSuperParam("")
+
+
+def pageRankFromRawMat():
     '''
     deprecated: rawMat will cause OOM,using pageRankFromRandom instead
     '''
     rawMat = rawMatGen.rawMat(N)
-    sparseMat = sparseMatGen.sparseMat(rawMat, block)
-    pr = powerIter.pageRank(sparseMat, beta, block)
+    sparseMat = sparseMatGen.sparseMat(rawMat, tranMatBlock)
+    pr = powerIter.pageRank(sparseMat, beta, rankBlock)
 
     cnt = 0
     loss = 0.
     beg = time.time()
     while (True):
         cnt += 1
-        pr.iter(block)
+        pr.iter(rankBlock)
         ok, loss = pr.isConvergence(epsilon, metric.metric.get1Norm)
         print(f"iter:{cnt} loss:{loss}")
         if ok:
@@ -54,10 +71,9 @@ def pageRankFromRawMat(block=2):
 
 
 @metric.printTimeElapsed
-def pageRankFromRandom(block=2):
-    # rawMat = rawMatGen.rawMat(N)
-    sparseMat = sparseMatGen.sparseMat(N, block)
-    pr = powerIter.pageRank(sparseMat, beta, block)
+def pageRankFromRandom():
+    sparseMat = sparseMatGen.sparseMat(N, tranMatBlock)
+    pr = powerIter.pageRank(sparseMat, beta, rankBlock)
 
     cnt = 0
     loss = 0.
@@ -65,7 +81,8 @@ def pageRankFromRandom(block=2):
 
     while (True):
         cnt += 1
-        pr.iter(block)
+        # use rankBlock to iter, if rankBlock != tranMatBlock, it should be a block-based powerIter
+        pr.iter(rankBlock)
         ok, loss = pr.isConvergence(epsilon, norm)
         print(f"\033[1;36miter:{cnt} loss:{loss}\033[0m")
         if ok:
@@ -80,4 +97,4 @@ def pageRankFromRandom(block=2):
     print(f"topK:{topK}", pages)
 
 
-pageRankFromRandom(block)
+pageRankFromRandom()

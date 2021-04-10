@@ -43,6 +43,16 @@ c -->|"getkBest()"| c
 
 目前我们采用直接生成分块的sparseMat,速度上大幅提升
 
+## 超参数
+```toml
+norm = metric.metric.get1Norm
+beta = 0.8
+N = 100000
+rankBlock = 2
+tranMatBlock = 2
+epsilon = 0.01
+topK = 10
+```
 ## 幂迭代
 基于`block-strip`的幂迭代算法:  
 ```python
@@ -59,11 +69,13 @@ pr = powerIter.pageRank(sparseMat, beta, block)
 sparseMat = sparseMatGen.sparseMat(N, 1)
 pr = powerIter.pageRank(sparseMat, beta, 1)
 ```
+> 在实践中,只有block-strip的算法能较快的跑出来
+
 
 基于block-strip的测试代码:
 ```python
-sparseMat = sparseMatGen.sparseMat(N, block)
-pr = powerIter.pageRank(sparseMat, beta, block)
+sparseMat = sparseMatGen.sparseMat(N, tranMatBlock)
+pr = powerIter.pageRank(sparseMat, beta, rankBlock)
 
 cnt = 0
 loss = 0.
@@ -71,7 +83,8 @@ beg = time.time()
 
 while (True):
     cnt += 1
-    pr.iter(block)
+    # use rankBlock to iter, if rankBlock != tranMatBlock, it should be a block-based powerIter
+    pr.iter(rankBlock)
     ok, loss = pr.isConvergence(epsilon, norm)
     print(f"\033[1;36miter:{cnt} loss:{loss}\033[0m")
     if ok:
@@ -81,30 +94,35 @@ end = time.time()
 ```
 
 ```sh
-[Time] function GenBlockPageLinks               done, elapsed: 11.288015604019165s
-[Time] function iterBlock                       done, elapsed: 1.4938631057739258s
-[Time] function iter                            done, elapsed: 1.4938631057739258s
-[Time] function isConvergence                   done, elapsed: 0.029286861419677734s
-iter:1 loss:0.2051479146187183
-[Time] function iterBlock                       done, elapsed: 1.5120673179626465s
-[Time] function iter                            done, elapsed: 1.5120673179626465s
-[Time] function isConvergence                   done, elapsed: 0.026860952377319336s
-iter:2 loss:0.05188872172406834
-[Time] function iterBlock                       done, elapsed: 1.5165603160858154s
-[Time] function iter                            done, elapsed: 1.5175974369049072s
-[Time] function isConvergence                   done, elapsed: 0.023964405059814453s
-iter:3 loss:0.01331470528623809
-[Time] function iterBlock                       done, elapsed: 1.4943392276763916s
-[Time] function iter                            done, elapsed: 1.4943392276763916s
-[Time] function isConvergence                   done, elapsed: 0.027005672454833984s
-iter:4 loss:0.003420038875911453
-[done] iter:4 , loss=0.003420038875911453 , time:6.128960132598877s 
-[Time] function getkBest                        done, elapsed: 0.0189969539642334s
+method:block-strip norm:get1Norm epsilon:0.01 beta:0.8
+N:100000 rankBlock:2 transferMatBlock:2 topK:10
+
+>>Using version: 3      generate blocked/unblocked sparseMat from random
+[Time] function GenBlockPageLinks               done, elapsed: 11.380315780639648s
+[Time] function iterBlock                       done, elapsed: 1.5324246883392334s
+[Time] function iter                            done, elapsed: 1.5324790477752686s
+[Time] function isConvergence                   done, elapsed: 0.023917198181152344s
+iter:1 loss:0.20541711253191414
+[Time] function iterBlock                       done, elapsed: 1.5140271186828613s
+[Time] function iter                            done, elapsed: 1.5140271186828613s
+[Time] function isConvergence                   done, elapsed: 0.037732601165771484s
+iter:2 loss:0.051956837022985404
+[Time] function iterBlock                       done, elapsed: 1.4992117881774902s
+[Time] function iter                            done, elapsed: 1.4992117881774902s
+[Time] function isConvergence                   done, elapsed: 0.040131568908691406s
+iter:3 loss:0.01331376224195206
+[Time] function iterBlock                       done, elapsed: 1.5105924606323242s
+[Time] function iter                            done, elapsed: 1.5105924606323242s
+[Time] function isConvergence                   done, elapsed: 0.038841962814331055s
+iter:4 loss:0.0034044184233290487
+[done] iter:4 , loss=0.0034044184233290487 , time:6.200764417648315s 
+[Time] function getkBest                        done, elapsed: 0.020008563995361328s
 =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-version:block-strip norm:get1Norm N:100000 block:2 epsilon:0.01 beta:0.8 topK:10
+method:block-strip norm:get1Norm epsilon:0.01 beta:0.8
+N:100000 rankBlock:2 transferMatBlock:2 topK:10
 =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-topK:10 [{99492,2.4467868468307758e-05}, {52213,2.2831662494980623e-05}, {31316,2.275518415162204e-05}, {30117,2.237661085315984e-05}, {87025,2.2047833295394432e-05}, {70664,2.1979179042671457e-05}, {74682,2.195218374211288e-05}, {82260,2.1896281467010162e-05}, {68772,2.1878808206160118e-05}, {66221,2.1811104731274202e-05}]
-[Time] function pageRankFromRandom              done, elapsed: 18.44188618659973s
+topK:10 [{45545,2.316647131960007e-05}, {87035,2.3057621766561018e-05}, {23290,2.2491626018793358e-05}, {8112,2.234915791275326e-05}, {84458,2.2231686800637305e-05}, {41871,2.2087394246452247e-05}, {46410,2.202682727085905e-05}, {73630,2.189704093956144e-05}, {94730,2.1877865475172602e-05}, {3218,2.1826694924946933e-05}]
+[Time] function pageRankFromRandom              done, elapsed: 18.633790254592896s
 ```
 
 ## 耗时
