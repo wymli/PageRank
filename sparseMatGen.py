@@ -201,6 +201,8 @@ class sparseMat(ITransferMat):
         # u will see the error if u run the program with rankBlock=2 and transferMatBlock=1(block-based method)
         if self.block == 1:
             return self.pageLinks
+        # when using block-strip method,we should return a block
+        # todo: load&store data from file
         return self.pageLinks[i].pageLinks
 
 

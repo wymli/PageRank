@@ -17,7 +17,6 @@ topK = 10
 
 # note: maybe the best practise: block=2
 
-methodStr = ""
 
 
 def getMethodStr() -> str:

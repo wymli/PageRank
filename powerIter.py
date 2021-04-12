@@ -3,7 +3,10 @@ from ITransferMat import ITransferMat
 import metric
 import heapq
 import json
+from os import path
+import os
 
+mock = False
 
 class page(object):
     def __init__(self, src, rank):
@@ -23,19 +26,22 @@ class pageRank(object):
     def __init__(self, transferMat: ITransferMat, beta: float, block: int = 1, storeDir: str = "."):
         '''
         1-beta : the rate of tp;\n
-        block: the number of pages in one block;
+        block: the number of pages in one block;\n
+        self.rank will be stored in "newRank"\n
+        self.oldRank will be stored in "oldRank"\n
         '''
+        self.newFileName = path.join(storeDir, "newRank")
+        self.oldFileName = path.join(storeDir, "oldRank")
         self.size = transferMat.size()
-        self.rank = [1./self.size for _ in range(self.size)]
-        self.oldRank = [-999 for _ in range(self.size)]
+        self.storeNewRank([1./self.size for _ in range(self.size)])
+        self.storeOldRank([-999 for _ in range(self.size)])
         self.mat = transferMat
         self.beta = beta
         self.block = block
         self.tranMatBlock = transferMat.block
         self.preVal = (1.-self.beta)/self.size
-        self.storeDir = storeDir
 
-    def loadRank(self, block: int, type: str) -> []:
+    def loadRank(self, type: str) -> []:
         '''
         we will load data from storeDir
         if block == 1 ,we won't block i.e. return a origin rank list,otherwise return a block-based rank list
@@ -45,38 +51,54 @@ class pageRank(object):
         we must implement it ourselves, because we only want to read one block into memory one time
         '''
         if type == "new":
-            if block == 1:
+            if mock:
                 return self.rank.copy()
-            else:
-                iterCnt = (self.size+block-1) // block
-                return [self.rank[block*i: min(block*(i+1), self.size)].copy() for i in range(iterCnt)]
+            return pageRank.fileTolist(self.newFileName)
         elif type == "old":
-            if block == 1:
+            if mock:
                 return self.oldRank.copy()
-            else:
-                iterCnt = (self.size+block-1) // block
-                return [self.oldRank[block*i: min(block*(i+1), self.size)].copy() for i in range(iterCnt)]
+            return pageRank.fileTolist(self.oldFileName)
         else:
             raise "type not inplemented"
 
-    def loadNewRank(self, block: int = 1) -> []:
-        return self.loadRank(block, "new")
+    def loadNewRank(self) -> []:
+        '''
+        default: block=1, unblock, return the whole rank
+        '''
+        return self.loadRank("new")
 
-    def loadOldRank(self, block: int = 1) -> []:
-        return self.loadRank(block, "old")
+    def loadOldRank(self) -> []:
+        '''
+        default: block=1, unblock, return the whole rank
+        '''
+        return self.loadRank("old")
+
+    @staticmethod
+    def listToFile(rank: [], filename: str):
+        with open(filename, "w") as f:
+            for r in rank:
+                f.write(str(r)+"\n")
+
+    @staticmethod
+    def fileTolist(filename: str):
+        with open(filename, "r")as f:
+            res = []
+            for line in f:
+                res.append(float(line.strip("\n")))
+        return res
 
     def storeRank(self, rank: [], type: str):
         '''
-        we will store data to storeDir
-        \n
+        we will store data to storeDir\n
         todo: add a encoder ,write the encoded str/binary to file
         '''
         if type == "new":
             self.rank = rank
-            # json.dumps(self.rank)
+            pageRank.listToFile(rank, self.newFileName)
             return
         elif type == "old":
             self.oldRank = rank
+            pageRank.listToFile(rank, self.oldFileName)
             return
         else:
             raise "type not inplemented"
@@ -87,7 +109,7 @@ class pageRank(object):
     def storeOldRank(self, rank: []):
         self.storeRank(rank, "old")
 
-    def extendNewRank(self, rank: []):
+    def extendNewRank(self, rank: [], fp):
         '''
         only append it to "new",typically it will append one block rank to rankFile
         \n
@@ -96,7 +118,23 @@ class pageRank(object):
         and then append this encoded str of the block,and then add "}" to make a close
         '''
         self.rank.extend(rank)
+        # append
+        for r in rank:
+            fp.write(str(r)+"\n")
         return
+
+    def expireNewRank(self):
+        '''
+        now we run a new iter, typically,the original newRank should change to oldRank,
+        so we will rename newRank to oldRank
+        '''
+        self.oldRank = self.rank.copy()
+        self.rank = []
+        try:
+            os.rename(self.newFileName, self.oldFileName)
+        except Exception:
+            os.remove(self.oldFileName)
+            os.rename(self.newFileName, self.oldFileName)
 
     @metric.printTimeElapsed
     def iter(self, block):
@@ -109,7 +147,8 @@ class pageRank(object):
             return
 
         newRank = [self.preVal for _ in range(self.size)]
-        oldRank = self.loadNewRank()
+        self.expireNewRank()
+        oldRank = self.loadOldRank()
 
         for i in range(self.size):
             pl = self.mat.getPageLink(i)
@@ -117,17 +156,18 @@ class pageRank(object):
                 newRank[dest] += self.beta * oldRank[pl.src] / pl.deg
 
         self.storeNewRank(newRank)
-        # todo:for efficiency, we can just rename the file,instead of writing back again
-        self.storeOldRank(oldRank)
+        # self.storeOldRank(oldRank)
 
     @metric.printTimeElapsed
     def iterBlock(self):
         '''
-        this is a kind of Block Stripe pagerank
+        this is a kind of block-based or block-strip pagerank
         '''
-        oldRank = self.loadNewRank()
+        self.expireNewRank()
+        oldRank = self.loadOldRank()
+        fp = open(self.newFileName, "w")
+
         n = (self.size+self.block-1) // self.block  # ceil(rawMat / block)
-        self.rank = []
         for i in range(n):
             curBlockLen = min((i+1)*self.block, self.size) - i*self.block
             newBlockRank = [self.preVal for _ in range(curBlockLen)]
@@ -138,8 +178,9 @@ class pageRank(object):
                     #       "curBlocklen:", curBlockLen, "src:", pl.src,"outDeg",pl.deg, "oldRanklen:", len(oldRank) , "oldRank:",oldRank[pl.src])
                     newBlockRank[dest %
                                  self.block] += self.beta * oldRank[pl.src] / pl.deg
-            self.extendNewRank(newBlockRank)
-        self.storeOldRank(oldRank)
+            self.extendNewRank(newBlockRank, fp)
+        fp.close()
+        # self.storeOldRank(oldRank)
 
     @metric.printTimeElapsed
     def isConvergence(self, epsilon: float, metricFunc=metric.metric.get2Norm) -> (bool, float):
