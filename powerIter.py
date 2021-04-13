@@ -8,6 +8,7 @@ import os
 
 mock = False
 
+
 class page(object):
     def __init__(self, src, rank):
         self.src = src
@@ -23,13 +24,15 @@ class page(object):
 
 
 class pageRank(object):
-    def __init__(self, transferMat: ITransferMat, beta: float, block: int = 1, storeDir: str = "."):
+    def __init__(self, transferMat: ITransferMat, beta: float, block: int = 1, storeDir: str = "./tmp"):
         '''
         1-beta : the rate of tp;\n
         block: the number of pages in one block;\n
         self.rank will be stored in "newRank"\n
         self.oldRank will be stored in "oldRank"\n
         '''
+        if not path.isdir(storeDir):
+            os.makedirs(storeDir)
         self.newFileName = path.join(storeDir, "newRank")
         self.oldFileName = path.join(storeDir, "oldRank")
         self.size = transferMat.size()
@@ -125,8 +128,9 @@ class pageRank(object):
 
     def expireNewRank(self):
         '''
-        now we run a new iter, typically,the original newRank should change to oldRank,
-        so we will rename newRank to oldRank
+        when we run a new iter,we will call expire\n
+        typically,the original newRank should be changed to oldRank,
+        so we will rename newRank to oldRank,and make newRank empty
         '''
         self.oldRank = self.rank.copy()
         self.rank = []
@@ -156,7 +160,6 @@ class pageRank(object):
                 newRank[dest] += self.beta * oldRank[pl.src] / pl.deg
 
         self.storeNewRank(newRank)
-        # self.storeOldRank(oldRank)
 
     @metric.printTimeElapsed
     def iterBlock(self):

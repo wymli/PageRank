@@ -17,6 +17,11 @@ topK = 10
 
 # note: maybe the best practise: block=2
 
+# if use mock,we will load&store data from memory,instead of file
+# we will always store a copy of data in memory for legacy problem,
+# but whether to load in-memory data or in-file data will be redecided by var "mock"
+sparseMatGen.mock = False
+powerIter.mock = False
 
 
 def getMethodStr() -> str:
@@ -35,10 +40,11 @@ def printSuperParam(delim=""):
     print(
         f"method:{getMethodStr()} norm:{norm.__name__} epsilon:{epsilon} beta:{beta}")
     print(f"N:{N} rankBlock:{rankBlock} transferMatBlock:{tranMatBlock} topK:{topK}")
+    print(f"in-memory mock: mat:{sparseMatGen.mock} rank:{powerIter.mock}")
     print(delim, "\033[0m")
 
 
-printSuperParam("")
+printSuperParam("~x~ "*10)
 
 
 def pageRankFromRawMat():
