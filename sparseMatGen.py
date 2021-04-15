@@ -62,7 +62,11 @@ class sparseMat(ITransferMat):
         \n
         in practice:\n
         version=2 is proved slow to convert blockedSparseMat from unblockedSparseMat\n 
-        version=1 is proved OOM to owm a large im-memory RawMat and conversion is alse slow
+        version=1 is proved OOM to owm a large im-memory RawMat and conversion is alse slow\n
+        \n
+        todo: \n
+        now we will allocate memory for pageLinks, and then store it to the file,\n
+        obviously we should store it to the file directly 
         '''
         if not path.isdir(storeDir):
             os.makedirs(storeDir)

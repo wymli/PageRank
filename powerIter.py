@@ -96,12 +96,16 @@ class pageRank(object):
         todo: add a encoder ,write the encoded str/binary to file
         '''
         if type == "new":
-            self.rank = rank
-            pageRank.listToFile(rank, self.newFileName)
+            if mock:
+                self.rank = rank
+            else:
+                pageRank.listToFile(rank, self.newFileName)
             return
         elif type == "old":
-            self.oldRank = rank
-            pageRank.listToFile(rank, self.oldFileName)
+            if mock:
+                self.oldRank = rank
+            else:
+                pageRank.listToFile(rank, self.oldFileName)
             return
         else:
             raise "type not inplemented"
@@ -120,11 +124,11 @@ class pageRank(object):
         if you use json, you should remove the last "}" in the file ,
         and then append this encoded str of the block,and then add "}" to make a close
         '''
-        self.rank.extend(rank)
-        # append
-        for r in rank:
-            fp.write(str(r)+"\n")
-        return
+        if mock:
+            self.rank.extend(rank)
+        else:
+            for r in rank:
+                fp.write(str(r)+"\n")
 
     def expireNewRank(self):
         '''
@@ -132,13 +136,15 @@ class pageRank(object):
         typically,the original newRank should be changed to oldRank,
         so we will rename newRank to oldRank,and make newRank empty
         '''
-        self.oldRank = self.rank.copy()
-        self.rank = []
-        try:
-            os.rename(self.newFileName, self.oldFileName)
-        except Exception:
-            os.remove(self.oldFileName)
-            os.rename(self.newFileName, self.oldFileName)
+        if mock:
+            self.oldRank = self.rank.copy()
+            self.rank = []
+        else:
+            try:
+                os.rename(self.newFileName, self.oldFileName)
+            except Exception:
+                os.remove(self.oldFileName)
+                os.rename(self.newFileName, self.oldFileName)
 
     @metric.printTimeElapsed
     def iter(self, block):
@@ -192,7 +198,7 @@ class pageRank(object):
         # print("new:", newRank)
         # print("old:", oldRank)
         metric = metricFunc([x[0] - x[1]
-                             for x in zip(self.rank, self.oldRank)])
+                             for x in zip(oldRank, newRank)])
         if metric <= epsilon:
             return True, metric
         return False, metric
@@ -202,9 +208,10 @@ class pageRank(object):
         '''
         top-k problem
         '''
-        res = [page(i, v) for i, v in enumerate(self.rank[:k])]
+        newRank = self.loadNewRank()
+        res = [page(i, v) for i, v in enumerate(newRank[:k])]
         heapq.heapify(res)
-        for i, v in enumerate(self.rank[k:]):
+        for i, v in enumerate(newRank[k:]):
             if v < res[0].rank:
                 continue
             else:
