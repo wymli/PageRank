@@ -48,11 +48,13 @@ topK = 10
 ```
 ## 幂迭代
 基于`block-strip`的幂迭代算法:  
+> 似乎block=2时,迭代最快
 ```python
 sparseMat = sparseMatGen.sparseMat(N, block)
 pr = powerIter.pageRank(sparseMat, beta, block)
 ```  
 基于block-based的幂迭代算法
+> rankBlock越大,迭代越快
 ```python
 sparseMat = sparseMatGen.sparseMat(N, 1)
 pr = powerIter.pageRank(sparseMat, beta, block)

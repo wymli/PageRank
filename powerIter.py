@@ -119,10 +119,6 @@ class pageRank(object):
     def extendNewRank(self, rank: [], fp):
         '''
         only append it to "new",typically it will append one block rank to rankFile
-        \n
-        todo: add a encoder ,append the encoded str/binary to the file\n
-        if you use json, you should remove the last "}" in the file ,
-        and then append this encoded str of the block,and then add "}" to make a close
         '''
         if mock:
             self.rank.extend(rank)
@@ -185,6 +181,10 @@ class pageRank(object):
                 for dest in pl.dests:
                     # print("dest:", dest, "block:", self.block,
                     #       "curBlocklen:", curBlockLen, "src:", pl.src,"outDeg",pl.deg, "oldRanklen:", len(oldRank) , "oldRank:",oldRank[pl.src])
+
+                    # this is a patch for block-based method, when using block-strip method, it will be always false
+                    if dest >= min(self.block*(i+1), self.size) or dest < self.block * i:
+                        continue
                     newBlockRank[dest %
                                  self.block] += self.beta * oldRank[pl.src] / pl.deg
             self.extendNewRank(newBlockRank, fp)

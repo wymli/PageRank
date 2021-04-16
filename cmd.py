@@ -15,6 +15,7 @@ tranMatBlock = 2
 epsilon = 0.01
 topK = 10
 
+# note: block: 一块中含有的pagelink数目,比如block=2,则一块含两条记录.特别的,如果block=1,则代表不分块
 # note: maybe the best practise: block=2
 
 # if use mock,we will load&store data from memory,instead of file

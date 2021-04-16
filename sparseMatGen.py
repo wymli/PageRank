@@ -65,7 +65,7 @@ class sparseMat(ITransferMat):
         version=1 is proved OOM to owm a large im-memory RawMat and conversion is alse slow\n
         \n
         todo: \n
-        now we will allocate memory for pageLinks, and then store it to the file,\n
+        now we will allocate memory for sparseMat, and then store it to the file,\n
         obviously we should store it to the file directly 
         '''
         if not path.isdir(storeDir):
@@ -101,10 +101,11 @@ class sparseMat(ITransferMat):
                 raise "rawMat should be [] in version 2"
             self.size_ = rawMat.size()
             self.pageLinks = sparseMat.RawMatToSparse(rawMat, block)
-        
+
         print("<<\033[0m")
-        # persist to file
-        if not mock:
+        # 如果不用内存模拟,并且矩阵分块,则持久化.
+        # 如果不分块,是block-based method
+        if not mock and self.block != 1:
             self.storeBlockPageLink()
 
     def size(self):
@@ -236,17 +237,19 @@ class sparseMat(ITransferMat):
         if self.block == 1:
             return self.pageLinks
         # when using block-strip method,we should return a block
-        # todo: load&store data from file
         if mock:
             return self.pageLinks[i].pageLinks
         return self.loadBlockPageLink(i).pageLinks
 
     def loadBlockPageLink(self, i):
-        # see getBlockPageLink,this is a version that read data from file
+        '''
+        read data from file, it will be called in getBlockPageLink
+        '''
+        # 如果不分块,那么transferMat将存在于内存中,而无需持久化,这是block-based pagerank
         if self.block == 1:
-            return self.pageLinks
+            return blockPageLink(self.pageLinks)
         if i == 0:
-            if  self.blockFp != None:
+            if self.blockFp != None:
                 self.blockFp.seek(0)
             else:
                 self.blockFp = open(path.join(self.storeDir, f"block"), "r")
@@ -273,6 +276,11 @@ class sparseMat(ITransferMat):
         with open(path.join(self.storeDir, "block"), "w") as f:
             for bpl in self.pageLinks:
                 f.write(bpl.toFileStr())
+
+    @staticmethod
+    def extendFile(fp , data:[]):
+        fp.writelines(data)
+
 
 
 def TestToSparse():
