@@ -28,6 +28,22 @@ type pageRank struct{
 }
 ```
 
+```mermaid
+graph LR;
+label("version1最符合作业要求文档的流程")-->ax("version3效率最佳")
+
+x(random)-->|version1|a("rawMat([[float]])")-->b("sparseMat([pageLink]) - unblocked")-->c("sparseMat([[pageLink]]) - blocked")-->d(pageRank)
+
+x --> |version2|b
+x --> |version3|c
+
+d -->|"iter()"|d
+d -->|"isConvergence()"| d
+d -->|"getkBest()"| d
+
+
+```
+
 ## 数据生成
 
 在实际生成数据时，不适用rawMat，而是直接在sparseMat中一边生成列数据，一边转成pageLink，否则巨大的rawMat会导致OOM，即使我们有足够的内存，我们在遍历rawMat生成sparseMat的时候，也会需要至少N^2的遍历次数，极其缓慢
@@ -52,7 +68,7 @@ topK = 10
 ```python
 sparseMat = sparseMatGen.sparseMat(N, block)
 pr = powerIter.pageRank(sparseMat, beta, block)
-```  
+```
 基于block-based的幂迭代算法
 > rankBlock越大,迭代越快
 ```python
