@@ -9,7 +9,7 @@ import metric
 
 norm = metric.metric.get1Norm
 beta = 0.8
-N = 100000
+N = 1000
 rankBlock = 2
 tranMatBlock = 2
 epsilon = 0.01
@@ -48,38 +48,19 @@ def printSuperParam(delim=""):
 printSuperParam("~x~ "*10)
 
 
-def pageRankFromRawMat():
-    '''
-    deprecated: rawMat will cause OOM,using pageRankFromRandom instead
-    '''
-    rawMat = rawMatGen.rawMat(N)
-    sparseMat = sparseMatGen.sparseMat(rawMat, tranMatBlock)
-    pr = powerIter.pageRank(sparseMat, beta, rankBlock)
-
-    cnt = 0
-    loss = 0.
-    beg = time.time()
-    while (True):
-        cnt += 1
-        pr.iter(rankBlock)
-        ok, loss = pr.isConvergence(epsilon, metric.metric.get1Norm)
-        print(f"iter:{cnt} loss:{loss}")
-        if ok:
-            break
-
-    end = time.time()
-
-    print(f"[done] iter:{cnt} , loss={loss} , time:{end-beg}s ")
-    pages = pr.getkBest(topK)
-    pages.sort(reverse=True)
-    printSuperParam("=*"*20)
-    print(f"topK:{topK}", pages)
-
-
 @metric.printTimeElapsed
-def pageRankFromRandom():
-    sparseMat = sparseMatGen.sparseMat(N, tranMatBlock)
-    pr = powerIter.pageRank(sparseMat, beta, rankBlock)
+def pageRank(version=3):
+    spraseMat, pr = None, None
+    if version == 3 or version == 2:
+        sparseMat = sparseMatGen.sparseMat(N, tranMatBlock, version=version)
+        pr = powerIter.pageRank(sparseMat, beta, rankBlock)
+    elif version == 1:
+        rawMat = rawMatGen.rawMat(N)
+        sparseMat = sparseMatGen.sparseMat(
+            rawMat, tranMatBlock, version=version)
+        pr = powerIter.pageRank(sparseMat, beta, rankBlock)
+    else:
+        raise "not supported version"
 
     cnt = 0
     loss = 0.
@@ -103,4 +84,4 @@ def pageRankFromRandom():
     print(f"topK:{topK}", pages)
 
 
-pageRankFromRandom()
+pageRank(version=1)

@@ -53,7 +53,7 @@ class sparseMat(ITransferMat):
     def __init__(self, rawMat: rawMat, block=1, version=3, storeDir="./tmp/transferMat"):
         '''
         if type(rawMat) is int,we will generate sparseMat from random\n
-        if type(rawMat) is 2d-array,we will generate sparseMat from origin rawMat\n
+        if type(rawMat) is rawMatGen.rawMat(2d-array),we will generate sparseMat from origin rawMat\n
         \n
         about version:\n
         version=3: we will generate blockedSparseMat directly from random\n
@@ -95,10 +95,10 @@ class sparseMat(ITransferMat):
                     self.pageLinks, block)
         elif version == 1:
             # deprecated:
-            # the following code is only used when rawMat is a 2d-array
+            # the following code is only used when rawMat is a 2d-array(rawMatGen.rawMat)
             print("generate blocked/unblocked sparseMat from rawMat")
-            if not isinstance(rawMat, list):
-                raise "rawMat should be [] in version 2"
+            if not isinstance(rawMat, rawMatGen.rawMat):
+                raise "rawMat should be [] in version 1"
             self.size_ = rawMat.size()
             self.pageLinks = sparseMat.RawMatToSparse(rawMat, block)
 
@@ -278,9 +278,8 @@ class sparseMat(ITransferMat):
                 f.write(bpl.toFileStr())
 
     @staticmethod
-    def extendFile(fp , data:[]):
+    def extendFile(fp, data: []):
         fp.writelines(data)
-
 
 
 def TestToSparse():
