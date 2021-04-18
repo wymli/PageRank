@@ -9,7 +9,7 @@ import metric
 
 norm = metric.metric.get1Norm
 beta = 0.8
-N = 1000
+N = 100
 rankBlock = 2
 tranMatBlock = 2
 epsilon = 0.01
@@ -84,4 +84,4 @@ def pageRank(version=3):
     print(f"topK:{topK}", pages)
 
 
-pageRank(version=1)
+pageRank(version=2)

@@ -89,6 +89,9 @@ class sparseMat(ITransferMat):
             # and then generate [blockpagelink] from [pagelink]
             print(
                 "generate blocked sparseMat from unblocked sparseMat(which is from random directly)")
+            if not isinstance(rawMat, int):
+                raise "rawMat should be int in version 2"
+            self.size_ = rawMat
             self.pageLinks = sparseMat.GenPageLinks(self.size_)
             if block != 1:
                 self.pageLinks = sparseMat.PageLinks2Block(
